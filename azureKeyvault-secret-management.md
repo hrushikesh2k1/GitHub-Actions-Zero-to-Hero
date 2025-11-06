@@ -1,0 +1,22 @@
+**Integrate Azure Key Vault into a GitHub Actions workflow**
+---
+Integrate Azure Key Vault into your GitHub Actions workflow to securely manage sensitive credentials in one place. This approach reduces the risk of accidental exposure or unauthorized access to sensitive data.
+
+This GitHub Actions sample workflow demonstrates how to securely retrieve secrets from Azure Key Vault using OpenID Connect (OIDC) authentication.
+
+***Prerequisites**
+Configure a federated identity credential on a Microsoft Entra application or a user-assigned managed identity. Learn how in Authenticate to Azure from GitHub Actions by OpenID Connect. When you set up your federated credential, store these secrets in GitHub:
+AZURE_CLIENT_ID: Your Azure service principal's client ID.
+AZURE_TENANT_ID: Your Azure AD tenant ID.
+AZURE_SUBSCRIPTION_ID: Your Azure subscription ID.
+KEYVAULT_NAME: Your Key Vault name.
+Grant permissions: Make sure the service principal has appropriate access to the Key Vault (example, "Key Vault Secrets User" role).
+Replace <SECRET_NAME> with your Key Vault secret name.
+GitHub Actions workflow sample
+What the workflow does:
+
+Triggers on pushes to the main branch
+Uses OIDC authentication to connect to Azure (no passwords stored in GitHub)
+Retrieves a secret from Azure Key Vault
+Masks the secret value with ::add-mask:: to prevent it from appearing in logs
+Makes the secret available as an environment variable for subsequent steps
