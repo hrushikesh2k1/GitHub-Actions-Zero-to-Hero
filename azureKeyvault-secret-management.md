@@ -21,6 +21,51 @@ Replace <SECRET_NAME> with your Key Vault secret name.
 GitHub Actions workflow sample
 What the workflow does:
 
+```github actions
+name: Access Azure Key Vault and pass secret to workflow
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  get-secret:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Retrieve secret from Key Vault
+        id: keyvault
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            SECRET_VALUE=$(az keyvault secret show --name <SECRET_NAME> --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv)
+            echo "::add-mask::$SECRET_VALUE"
+            echo "SECRET_VALUE=$SECRET_VALUE" >> $GITHUB_ENV
+      - name: Use retrieved secret
+        run: echo "The secret is successfully retrieved!"
+
+      - name: Use SECRET_VALUE in deployment
+        run: |
+          ./deploy.sh
+        env:
+          SECRET_VALUE: ${{ env.SECRET_VALUE }}
+```
+
 Triggers on pushes to the main branch
 Uses OIDC authentication to connect to Azure (no passwords stored in GitHub)
 Retrieves a secret from Azure Key Vault
